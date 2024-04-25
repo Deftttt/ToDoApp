@@ -1,10 +1,7 @@
 package com.example.todocomposeapp.navigation.destinations
 
-import android.util.Log
-import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,7 +13,6 @@ import com.example.todocomposeapp.ui.screens.task.TaskScreen
 import com.example.todocomposeapp.ui.viewmodels.SharedViewModel
 import com.example.todocomposeapp.util.Action
 import com.example.todocomposeapp.util.Constants
-import com.example.todocomposeapp.util.Constants.TASK_ARGUMENT_KEY
 
 // Extension function
 fun NavGraphBuilder.taskComposable(

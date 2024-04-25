@@ -1,7 +1,6 @@
 package com.example.todocomposeapp.navigation.destinations
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideOutVertically
 import androidx.navigation.NavGraphBuilder
