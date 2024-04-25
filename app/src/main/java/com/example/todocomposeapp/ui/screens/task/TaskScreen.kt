@@ -3,16 +3,19 @@ package com.example.todocomposeapp.ui.screens.task
 import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import com.example.todocomposeapp.data.models.Priority
 import com.example.todocomposeapp.data.models.Task
 import com.example.todocomposeapp.ui.viewmodels.SharedViewModel
@@ -20,29 +23,30 @@ import com.example.todocomposeapp.util.Action
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskScreen(
     navigateToListScreen: (Action) -> Unit,
     selectedTask: Task?,
     sharedViewModel: SharedViewModel
 ) {
-    // Values we're observing from view model
-    val taskTitle: String by sharedViewModel.title
-    val taskDescription: String by sharedViewModel.description
-    val taskPriority: Priority by sharedViewModel.priority
+    // Values observed from view model
+    val taskTitle: String = sharedViewModel.title
+    val taskDescription: String = sharedViewModel.description
+    val taskPriority: Priority = sharedViewModel.priority
 
     val context = LocalContext.current
+
+    HandleBackButton(onBackPressed = {navigateToListScreen(Action.NO_ACTION)})
 
     Scaffold(
         topBar = {
             TaskAppBar(
                 navigateToListScreen = { action ->
-                    if(action == Action.NO_ACTION)
+                    if (action == Action.NO_ACTION)
                         navigateToListScreen(action)
                     // validate fields only if clicked to save task (Action.SAVE)
                     else {
-                        if(sharedViewModel.validateFields())
+                        if (sharedViewModel.validateFields())
                             navigateToListScreen(action)
                         else
                             displayToast(context)
@@ -53,7 +57,7 @@ fun TaskScreen(
                 selectedTask = selectedTask
             )
         }
-    ) // Inner padding so topBar is not overlapping content
+    )
     { innerPadding ->
         Column(
             modifier = Modifier
@@ -63,16 +67,15 @@ fun TaskScreen(
                 // value got from view model
                 title = taskTitle,
                 onTitleChange = {
-                    // change value in view model
                     sharedViewModel.updateTitle(it)
                 },
                 description = taskDescription,
                 onDescriptionChange = {
-                    sharedViewModel.description.value = it
+                    sharedViewModel.updateDescription(it)
                 },
                 priority = taskPriority,
                 onPrioritySelected = {
-                    sharedViewModel.priority.value = it
+                    sharedViewModel.updatePriority(it)
                 }
             )
         }
@@ -80,7 +83,30 @@ fun TaskScreen(
     }
 }
 
+@Composable
+fun HandleBackButton(
+    backDispatcher: OnBackPressedDispatcher? = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher,
+    onBackPressed: () -> Unit
+) {
+    val currentOnBackPressed by rememberUpdatedState(onBackPressed)
 
-fun displayToast(context: Context){
+    val backCallback = remember {
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                currentOnBackPressed()
+            }
+        }
+    }
+
+    DisposableEffect(key1 = backDispatcher) {
+        backDispatcher?.addCallback(backCallback)
+        onDispose {
+            backCallback.remove()
+        }
+    }
+
+}
+
+fun displayToast(context: Context) {
     Toast.makeText(context, "Fields empty!", Toast.LENGTH_SHORT).show()
 }

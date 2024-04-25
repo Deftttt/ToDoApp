@@ -2,6 +2,7 @@ package com.example.todocomposeapp.navigation.destinations
 
 import android.util.Log
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
@@ -27,10 +28,12 @@ fun NavGraphBuilder.listComposable(
 
         // Change action value in SharedViewModel
         LaunchedEffect(key1 = action){
-            sharedViewModel.action.value = action
+            sharedViewModel.updateAction(action)
         }
 
-        ListScreen(navigateToTaskScreen = navigateToTaskScreen, sharedViewModel = sharedViewModel)
+        val dbAction = sharedViewModel.action
+
+        ListScreen(navigateToTaskScreen = navigateToTaskScreen, sharedViewModel = sharedViewModel, action = dbAction)
 
     }
 }

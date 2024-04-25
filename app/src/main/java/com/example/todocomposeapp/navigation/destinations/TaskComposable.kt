@@ -1,6 +1,10 @@
 package com.example.todocomposeapp.navigation.destinations
 
 import android.util.Log
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -21,19 +25,31 @@ fun NavGraphBuilder.taskComposable(
 ){
     composable(
         route = Constants.TASK_SCREEN,
+        enterTransition = {
+            slideInHorizontally(
+                initialOffsetX = { -it },
+                animationSpec = tween(
+                    durationMillis = 400
+                ));
+        },
         arguments = listOf(navArgument(Constants.TASK_ARGUMENT_KEY){
             type = NavType.IntType
         })
     ){
         // Gets id from nav argument and gets task of that id
         val taskId = it.arguments!!.getInt(Constants.TASK_ARGUMENT_KEY)
-        sharedViewModel.getTaskById(taskId)
+        LaunchedEffect(key1 = taskId){
+            sharedViewModel.getTaskById(taskId)
+        }
         // observe value, if it changes recompose TaskScreen
         val selectedTask by sharedViewModel.selectedTask.collectAsState()
 
         // When selectedTask changes, update task fields
         LaunchedEffect(key1 = selectedTask){
-            sharedViewModel.updateTaskFields(selectedTask)
+            if(selectedTask != null || taskId == -1){
+                sharedViewModel.updateTaskFields(selectedTask)
+            }
+
         }
 
         TaskScreen(navigateToListScreen, selectedTask, sharedViewModel)

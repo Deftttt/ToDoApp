@@ -1,9 +1,6 @@
 package com.example.todocomposeapp.ui.screens.list
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,9 +36,9 @@ import com.example.todocomposeapp.R
 import com.example.todocomposeapp.components.PriorityItem
 import com.example.todocomposeapp.data.models.Priority
 import com.example.todocomposeapp.ui.viewmodels.SharedViewModel
+import com.example.todocomposeapp.util.Action
 import com.example.todocomposeapp.util.SearchAppBarState
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ListAppBar(
     sharedViewModel: SharedViewModel,
@@ -58,10 +55,14 @@ fun ListAppBar(
             SearchAppBarState.CLOSED -> {
                 DefaultListAppBar(
                     onSearchClicked = {
-                        sharedViewModel.searchAppBarState.value = SearchAppBarState.OPENED
+                        sharedViewModel.updateSearchAppBarState(SearchAppBarState.OPENED)
                     },
-                    onSortClicked = {},
-                    onDeleteClicked = {}
+                    onSortClicked = {
+                        sharedViewModel.saveSortState(it)
+                    },
+                    onDeleteClicked = {
+                        sharedViewModel.updateAction(Action.DELETE_ALL)
+                    }
                 )
             }
 
@@ -69,13 +70,15 @@ fun ListAppBar(
                 SearchAppBar(
                     text = searchTextState,
                     onTextChanged = {
-                        sharedViewModel.searchTextState.value = it
+                        sharedViewModel.updateSearchTextState(it)
                     },
                     onCloseClicked = {
-                        sharedViewModel.searchAppBarState.value = SearchAppBarState.CLOSED
-                        sharedViewModel.searchTextState.value = ""
+                        sharedViewModel.updateSearchAppBarState(SearchAppBarState.CLOSED)
+                        sharedViewModel.updateSearchTextState("")
                     },
-                    onSearchClicked = {}
+                    onSearchClicked = {
+                        sharedViewModel.getSearchedTasks(it)
+                    }
                 )
             }
         }
@@ -147,27 +150,16 @@ fun SortAction(
             onDismissRequest = { isExpanded = false }
         ) {
 
-            DropdownMenuItem(
-                text = { PriorityItem(priority = Priority.LOW) },
-                onClick = {
-                    isExpanded = false
-                    onSortClicked(Priority.LOW)
-                }
-            )
-            DropdownMenuItem(
-                text = { PriorityItem(priority = Priority.HIGH) },
-                onClick = {
-                    isExpanded = false
-                    onSortClicked(Priority.HIGH)
-                }
-            )
-            DropdownMenuItem(
-                text = { PriorityItem(priority = Priority.NONE) },
-                onClick = {
-                    isExpanded = false
-                    onSortClicked(Priority.NONE)
-                }
-            )
+            Priority.entries.slice(setOf(0,2,3)).forEach { priority ->
+                DropdownMenuItem(
+                    text = { PriorityItem(priority = priority) },
+                    onClick = {
+                        isExpanded = false
+                        onSortClicked(priority)
+                    }
+                )
+            }
+
         }
     }
 }

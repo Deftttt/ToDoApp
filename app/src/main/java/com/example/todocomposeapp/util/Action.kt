@@ -10,30 +10,12 @@ enum class  Action {
 }
 
 fun String?.toAction(): Action{
-    return when {
-        this == "ADD" -> {
-            return Action.ADD
-        }
-
-        this == "UPDATE" -> {
-            return Action.UPDATE
-        }
-
-        this == "DELETE" -> {
-            return Action.DELETE
-        }
-
-        this == "DELETE_ALL" -> {
-            return Action.DELETE_ALL
-        }
-
-        this == "UNDO" -> {
-            return Action.UNDO
-        }
-
-        else -> {
-            return Action.NO_ACTION
-        }
-
+    return when(this){
+        "ADD" -> Action.ADD
+        "UPDATE" -> Action.UPDATE
+        "DELETE" -> Action.DELETE
+        "DELETE_ALL" -> Action.DELETE_ALL
+        "UNDO" -> Action.UNDO
+        else -> Action.NO_ACTION
     }
 }
